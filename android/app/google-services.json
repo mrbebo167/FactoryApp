@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "335964168926",
+    "firebase_url": "https://factoryapp-7775e-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "factoryapp-7775e",
+    "storage_bucket": "factoryapp-7775e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:335964168926:android:77e209098788085d96984f",
+        "android_client_info": {
+          "package_name": "com.example.factoryapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7VUN2_8YhY-yImw_7FJLEInbGy4RQ0j8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
