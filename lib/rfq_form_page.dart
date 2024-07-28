@@ -1,107 +1,100 @@
 import 'package:flutter/material.dart';
-import 'l10n/app_localization.dart';
-import 'theme_manager.dart'; // Ensure the correct import path
+import 'theme_manager.dart';
 
-class ContactUsPage extends StatefulWidget {
+class RFQFormPage extends StatefulWidget {
+  final bool isDarkMode;
+
+  RFQFormPage({required this.isDarkMode});
+
   @override
-  _ContactUsPageState createState() => _ContactUsPageState();
+  _RFQFormPageState createState() => _RFQFormPageState();
 }
 
-class _ContactUsPageState extends State<ContactUsPage> {
+class _RFQFormPageState extends State<RFQFormPage> {
   final _formKey = GlobalKey<FormState>();
-  String? _selectedCompany;
-
-  // Example list of companies
-  final List<String> _companies = ['Company A', 'Company B', 'Company C'];
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _companyController = TextEditingController();
+  final TextEditingController _detailsController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    var localizations = AppLocalizations.of(context)!;
-    var theme = Theme.of(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(localizations.translate('contactUs')),
+        title: Text('Request for Quotation'),
+        backgroundColor: theme.colorScheme.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-       
         child: Form(
           key: _formKey,
-          child: Column(
+          child: ListView(
             children: [
-              DropdownButtonFormField<String>(
-                value: _selectedCompany,
-                items: _companies.map((String company) {
-                  return DropdownMenuItem<String>(
-                    value: company,
-                    child: Text(company),
-                  );
-                }).toList(),
+              TextFormField(
+                controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: localizations.translate('selectCompany'),
+                  labelText: 'Name',
                   fillColor: theme.colorScheme.surface,
                   filled: true,
-                  labelStyle: TextStyle(color: theme.colorScheme.onSurface),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return localizations.translate('selectCompany');
+                    return 'Please enter your name';
                   }
                   return null;
-                },
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCompany = value;
-                  });
                 },
               ),
               SizedBox(height: 20),
               TextFormField(
+                controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: localizations.translate('yourName'),
+                  labelText: 'Email',
                   fillColor: theme.colorScheme.surface,
                   filled: true,
-                  labelStyle: TextStyle(color: theme.colorScheme.onSurface),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return localizations.translate('yourName');
+                    return 'Please enter your email';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Please enter a valid email address';
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
               TextFormField(
+                controller: _companyController,
                 decoration: InputDecoration(
-                  labelText: localizations.translate('yourEmail'),
+                  labelText: 'Company',
                   fillColor: theme.colorScheme.surface,
                   filled: true,
-                  labelStyle: TextStyle(color: theme.colorScheme.onSurface),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return localizations.translate('yourEmail');
+                    return 'Please enter your company name';
                   }
                   return null;
                 },
               ),
               SizedBox(height: 20),
               TextFormField(
+                controller: _detailsController,
                 decoration: InputDecoration(
-                  labelText: localizations.translate('yourMessage'),
+                  labelText: 'Details',
                   fillColor: theme.colorScheme.surface,
                   filled: true,
-                  labelStyle: TextStyle(color: theme.colorScheme.onSurface),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
@@ -109,7 +102,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
                 maxLines: 5,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return localizations.translate('yourMessage');
+                    return 'Please enter the details of your request';
                   }
                   return null;
                 },
@@ -118,13 +111,13 @@ class _ContactUsPageState extends State<ContactUsPage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // Process the message
+                    // Process the RFQ here
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(localizations.translate('messageSent'))),
+                      SnackBar(content: Text('Request submitted successfully')),
                     );
                   }
                 },
-                child: Text(localizations.translate('submit')),
+                child: Text('Submit'),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: theme.colorScheme.onPrimary, backgroundColor: theme.colorScheme.primary,
                   padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
@@ -135,7 +128,6 @@ class _ContactUsPageState extends State<ContactUsPage> {
           ),
         ),
       ),
-      backgroundColor: theme.colorScheme.background,
     );
   }
 }

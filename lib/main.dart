@@ -15,6 +15,8 @@ import 'customer_home.dart';
 import 'registration_page.dart';
 import 'splash_screen.dart';
 import 'introduction_page.dart';
+import 'theme_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,13 +46,39 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _loadThemeAndLanguage();
+  }
+
+  void _loadThemeAndLanguage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? savedTheme = prefs.getBool('isDarkMode');
+    String? savedLanguage = prefs.getString('languageCode');
+
+    if (savedTheme != null) {
+      setState(() {
+        isDarkMode = savedTheme;
+      });
+    }
+
+    if (savedLanguage != null) {
+      setState(() {
+        _locale = Locale(savedLanguage);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => AuthService(),
       child: Consumer<AuthService>(
         builder: (context, authService, _) {
           return MaterialApp(
-            theme: isDarkMode ? ThemeData.dark() : ThemeData.light(),
+            theme: ThemeManager.lightTheme,
+            darkTheme: ThemeManager.darkTheme,
+            themeMode: ThemeMode.system,
             locale: _locale,
             localizationsDelegates: [
               AppLocalizations.delegate,
@@ -61,10 +89,71 @@ class _MyAppState extends State<MyApp> {
               const Locale('en'),
               const Locale('ar'),
             ],
-            home: SplashScreen(
-              isDarkMode: isDarkMode,
-              onThemeChanged: onThemeChanged,
-              onLanguageChanged: onLanguageChanged,
+            home: FutureBuilder<bool>(
+              future: _checkIntroductionSeen(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return SplashScreen(
+                    isDarkMode: isDarkMode,
+                    onThemeChanged: onThemeChanged,
+                    onLanguageChanged: onLanguageChanged,
+                  );
+                } else if (snapshot.data == false) {
+                  return IntroductionPage();
+                } else {
+                  return StreamBuilder<User?>(
+                    stream: authService.authStateChanges,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.active) {
+                        User? user = snapshot.data;
+
+                        if (user == null) {
+                          return LoginPage(
+                            isDarkMode: isDarkMode,
+                            onThemeChanged: onThemeChanged,
+                            onLanguageChanged: onLanguageChanged,
+                          );
+                        } else {
+                          return FutureBuilder<Widget>(
+                            future: authService.handleAuth(
+                              isDarkMode,
+                              onThemeChanged,
+                              onLanguageChanged,
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.done) {
+                                if (snapshot.hasData) {
+                                  return snapshot.data!;
+                                } else if (snapshot.hasError) {
+                                  return Scaffold(
+                                    body: Center(
+                                      child: Text('Error: ${snapshot.error}'),
+                                    ),
+                                  );
+                                } else {
+                                  return Scaffold(
+                                    body: Center(
+                                      child: Text('Unknown error'),
+                                    ),
+                                  );
+                                }
+                              } else {
+                                return Scaffold(
+                                  body: Center(child: CircularProgressIndicator()),
+                                );
+                              }
+                            },
+                          );
+                        }
+                      } else {
+                        return Scaffold(
+                          body: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                    },
+                  );
+                }
+              },
             ),
             routes: {
               '/forgotPassword': (context) => ForgotPasswordPage(
@@ -91,13 +180,7 @@ class _MyAppState extends State<MyApp> {
                     isDarkMode: isDarkMode,
                     onThemeChanged: onThemeChanged,
                     onLanguageChanged: onLanguageChanged,
-                    email: '',
-                  ),
-              '/introduction': (context) => IntroductionPage(),
-              '/login': (context) => LoginPage(
-                    isDarkMode: isDarkMode,
-                    onThemeChanged: onThemeChanged,
-                    onLanguageChanged: onLanguageChanged,
+                    email: '', // Ensure to pass the correct email
                   ),
               // Define other routes here
             },
@@ -105,5 +188,10 @@ class _MyAppState extends State<MyApp> {
         },
       ),
     );
+  }
+
+  Future<bool> _checkIntroductionSeen() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('seenIntroduction') ?? false;
   }
 }

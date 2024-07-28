@@ -3,6 +3,7 @@ import 'l10n/app_localization.dart';
 import 'setting.dart';
 import 'registration_page.dart';
 import 'horizontal_scroll_bar.dart'; // Ensure the correct import path
+import 'company_detail_page.dart'; // Import the company detail page
 
 class GuestHomePage extends StatefulWidget {
   final bool isDarkMode;
@@ -89,17 +90,8 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context)!;
-    // Example list of companies with images
+
     final companies = [
-      {'name': 'EES', 'image': 'assets/company1.png'},
-      {'name': 'INDUSTRIAS', 'image': 'assets/company2.png'},
-      {'name': 'STEEL', 'image': 'assets/company3.png'},
-      {'name': 'CAC', 'image': 'assets/company4.png'},
-      {'name': 'RENTAL', 'image': 'assets/company5.png'},
-      {'name': 'EQTASID', 'image': 'assets/company6.png'},
-    ];
-    // Example list of packs
-    final packs = [
       {'title': 'ELECTRICAL ENGINEERING SYSTEMS "EES"', 'image': 'assets/company1.png'},
       {'title': 'Heavy Metal industries', 'image': 'assets/company2.png'},
       {'title': 'Steel Galvanizing', 'image': 'assets/company3.png'},
@@ -111,7 +103,7 @@ class HomeScreen extends StatelessWidget {
     return SingleChildScrollView(
       child: Column(
         children: [
-          HorizontalScrollBar(companies: companies),
+          HorizontalScrollBar(companies: companies.map((c) => c['title']!).toList()),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: GridView.builder(
@@ -119,16 +111,32 @@ class HomeScreen extends StatelessWidget {
               physics: NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                crossAxisSpacing: 10,
+                crossAxisSpacing: 20,
                 mainAxisSpacing: 10,
-                childAspectRatio: 1, // Adjust the aspect ratio to make the boxes bigger or smaller
+                childAspectRatio: 1,
               ),
-              itemCount: packs.length,
+              itemCount: companies.length,
               itemBuilder: (context, index) {
-                return PackCard(
-                  title: packs[index]['title']!,
-                  image: packs[index]['image']!,
-                  isDarkMode: isDarkMode,
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CompanyDetailPage(
+                          companyName: companies[index]['title']!,
+                          aboutText: 'About text from file',
+                          services: ['Service 1', 'Service 2', 'Service 3'],
+                          certificates: ['Certificate 1', 'Certificate 2'],
+                        ),
+                      ),
+                    );
+                  },
+                  child: PackCard(
+                    title: companies[index]['title']!,
+                    exercises: '',
+                    image: companies[index]['image']!,
+                    isDarkMode: isDarkMode,
+                  ),
                 );
               },
             ),
@@ -139,59 +147,15 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class HorizontalScrollBar extends StatelessWidget {
-  final List<Map<String, String>> companies;
-
-  HorizontalScrollBar({required this.companies});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 320, // Increase the height to accommodate images
-      padding: EdgeInsets.symmetric(vertical: 10),
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: companies.length,
-        itemBuilder: (context, index) {
-          return Container(
-            width: 320,
-            margin: EdgeInsets.symmetric(horizontal: 10),
-            child: Column(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      companies[index]['image']!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 5),
-                Text(
-                  companies[index]['name']!,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
 class PackCard extends StatelessWidget {
   final String title;
+  final String exercises;
   final String image;
   final bool isDarkMode;
 
   PackCard({
     required this.title,
+    required this.exercises,
     required this.image,
     required this.isDarkMode,
   });
