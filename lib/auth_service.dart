@@ -14,6 +14,8 @@ class AuthService extends ChangeNotifier {
   // Getter to listen to auth state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  bool get isLoggedIn => currentUser != null;
+
   Future<void> signInWithEmailAndPassword(String email, String password) async {
     await _auth.signInWithEmailAndPassword(email: email, password: password);
     notifyListeners();
@@ -34,7 +36,7 @@ class AuthService extends ChangeNotifier {
         'lastName': lastName,
         'email': email,
         'role': 'customer',
-        'isAccepted': false, // Ensure the field is set during registration
+        'isAccepted': false,
       });
     }
 
@@ -61,19 +63,17 @@ class AuthService extends ChangeNotifier {
   Future<Widget> handleAuth(bool isDarkMode, Function(bool) onThemeChanged, Function(String) onLanguageChanged) async {
     if (currentUser == null) {
       return PendingPage(
-        isDarkMode: isDarkMode,
         onThemeChanged: onThemeChanged,
         onLanguageChanged: onLanguageChanged,
         email: '',
       );
     }
 
-    await currentUser!.reload(); // Ensure the latest user data is loaded
+    await currentUser!.reload();
     User? updatedUser = _auth.currentUser;
 
     if (!updatedUser!.emailVerified) {
       return PendingPage(
-        isDarkMode: isDarkMode,
         onThemeChanged: onThemeChanged,
         onLanguageChanged: onLanguageChanged,
         email: updatedUser.email ?? '',
@@ -86,7 +86,6 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       print("Error getting user role: $e");
       return PendingPage(
-        isDarkMode: isDarkMode,
         onThemeChanged: onThemeChanged,
         onLanguageChanged: onLanguageChanged,
         email: updatedUser.email ?? '',
@@ -99,7 +98,6 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       print("Error getting user document: $e");
       return PendingPage(
-        isDarkMode: isDarkMode,
         onThemeChanged: onThemeChanged,
         onLanguageChanged: onLanguageChanged,
         email: updatedUser.email ?? '',
@@ -112,7 +110,6 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       print("Error getting isAccepted field: $e");
       return PendingPage(
-        isDarkMode: isDarkMode,
         onThemeChanged: onThemeChanged,
         onLanguageChanged: onLanguageChanged,
         email: updatedUser.email ?? '',
@@ -120,9 +117,7 @@ class AuthService extends ChangeNotifier {
     }
 
     if (!isAccepted) {
-      print("User is not accepted, returning PendingPage");
       return PendingPage(
-        isDarkMode: isDarkMode,
         onThemeChanged: onThemeChanged,
         onLanguageChanged: onLanguageChanged,
         email: updatedUser.email ?? '',
@@ -131,23 +126,19 @@ class AuthService extends ChangeNotifier {
 
     switch (role) {
       case 'admin':
-        print("Navigating to AdminHomePage");
         return AdminHomePage(
           isDarkMode: isDarkMode,
           onThemeChanged: onThemeChanged,
           onLanguageChanged: onLanguageChanged,
         );
       case 'customer':
-        print("Navigating to CustomerHomeScreen");
         return CustomerHomeScreen(
           isDarkMode: isDarkMode,
           onThemeChanged: onThemeChanged,
           onLanguageChanged: onLanguageChanged,
         );
       default:
-        print("Navigating to GuestHomePage");
         return GuestHomePage(
-          isDarkMode: isDarkMode,
           onThemeChanged: onThemeChanged,
           onLanguageChanged: onLanguageChanged,
         );

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'l10n/app_localization.dart';
 import 'setting.dart';
 import 'registration_page.dart';
-import 'horizontal_scroll_bar.dart'; // Ensure the correct import path
-import 'company_detail_page.dart'; // Import the company detail page
+import 'horizontal_scroll_bar.dart';
+import 'company_detail_page.dart';
+import 'theme_manager.dart';
 
 class GuestHomePage extends StatefulWidget {
-  final bool isDarkMode;
   final Function(bool) onThemeChanged;
   final Function(String) onLanguageChanged;
 
   GuestHomePage({
-    required this.isDarkMode,
     required this.onThemeChanged,
     required this.onLanguageChanged,
   });
@@ -28,21 +28,19 @@ class _GuestHomePageState extends State<GuestHomePage> {
     var localizations = AppLocalizations.of(context)!;
 
     List<Widget> _pages = [
-      HomeScreen(isDarkMode: widget.isDarkMode),
+      HomeScreen(),
       RegistrationPage(
-        isDarkMode: widget.isDarkMode,
         onThemeChanged: widget.onThemeChanged,
         onLanguageChanged: widget.onLanguageChanged,
       ),
       SettingsPage(
-        isDarkMode: widget.isDarkMode,
         onThemeChanged: widget.onThemeChanged,
         onLanguageChanged: widget.onLanguageChanged,
       ),
     ];
 
     return Scaffold(
-      backgroundColor: widget.isDarkMode ? Color(0xFF1F1F1F) : Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(localizations.translate('guestHome') ?? 'Guest Home'),
         leading: IconButton(
@@ -74,36 +72,35 @@ class _GuestHomePageState extends State<GuestHomePage> {
             label: localizations.translate('settings') ?? 'Settings',
           ),
         ],
-        selectedItemColor: widget.isDarkMode ? Colors.yellow : Colors.yellow,
-        unselectedItemColor: widget.isDarkMode ? Colors.white : Colors.grey,
-        backgroundColor: widget.isDarkMode ? Color(0xFF1F1F1F) : Colors.white,
+        selectedItemColor: Theme.of(context).colorScheme.secondary,
+        unselectedItemColor: Theme.of(context).unselectedWidgetColor,
+        backgroundColor: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
       ),
     );
   }
 }
 
 class HomeScreen extends StatelessWidget {
-  final bool isDarkMode;
-
-  HomeScreen({required this.isDarkMode});
-
   @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context)!;
 
-    final companies = [
-      {'title': 'ELECTRICAL ENGINEERING SYSTEMS "EES"', 'image': 'assets/company1.png'},
-      {'title': 'Heavy Metal industries', 'image': 'assets/company2.png'},
-      {'title': 'Steel Galvanizing', 'image': 'assets/company3.png'},
-      {'title': 'HVAC Division', 'image': 'assets/company4.png'},
-      {'title': 'Equipment Rental', 'image': 'assets/company5.png'},
-      {'title': 'Energy Services Division "EQTASID"', 'image': 'assets/company6.png'},
+    // Example list of companies
+    final companies = ["Company A", "Company B", "Company C", "Company D"];
+    // Example list of packs
+    final packs = [
+      {'title': 'ELECTRICAL ENGINEERING SYSTEMS "EES"', 'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company1.png?alt=media&token=58eea9a1-2c66-4032-b5a0-e0771eaaa9fe'},
+      {'title': 'Heavy Metal industries', 'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company2.png?alt=media&token=43bac023-dcac-472f-b1b7-6c4a195c0d35'},
+      {'title': 'Steel Galvanizing', 'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company3.png?alt=media&token=fde97187-b06f-45a4-874f-06d1d727a78d'},
+      {'title': 'HVAC Division', 'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company4.png?alt=media&token=44247617-9c5f-42ed-9b11-b9fbb4bacefa'},
+      {'title': 'Equipment Rental', 'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company5.png?alt=media&token=9c2e2b36-c37f-4ff5-8d14-37ac3ec76780'},
+      {'title': 'Energy Services Division "EQTASID"', 'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company6.png?alt=media&token=43af472b-34a6-4ae6-9634-dac2f43896e5'},
     ];
 
     return SingleChildScrollView(
       child: Column(
         children: [
-          HorizontalScrollBar(companies: companies.map((c) => c['title']!).toList()),
+          HorizontalScrollBar(companies: companies),
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: GridView.builder(
@@ -111,32 +108,15 @@ class HomeScreen extends StatelessWidget {
               physics: NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                crossAxisSpacing: 20,
+                crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
-                childAspectRatio: 1,
+                childAspectRatio: 0.8,
               ),
-              itemCount: companies.length,
+              itemCount: packs.length,
               itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CompanyDetailPage(
-                          companyName: companies[index]['title']!,
-                          aboutText: 'About text from file',
-                          services: ['Service 1', 'Service 2', 'Service 3'],
-                          certificates: ['Certificate 1', 'Certificate 2'],
-                        ),
-                      ),
-                    );
-                  },
-                  child: PackCard(
-                    title: companies[index]['title']!,
-                    exercises: '',
-                    image: companies[index]['image']!,
-                    isDarkMode: isDarkMode,
-                  ),
+                return PackCard(
+                  title: packs[index]['title'] as String,
+                  image: packs[index]['image'] as String,
                 );
               },
             ),
@@ -149,53 +129,63 @@ class HomeScreen extends StatelessWidget {
 
 class PackCard extends StatelessWidget {
   final String title;
-  final String exercises;
   final String image;
-  final bool isDarkMode;
 
   PackCard({
     required this.title,
-    required this.exercises,
     required this.image,
-    required this.isDarkMode,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: isDarkMode ? Colors.black : Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
-              child: Image.asset(
-                image,
-                fit: BoxFit.cover,
-                width: double.infinity,
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CompanyDetailPage(
+              companyName: title,
+              aboutText: 'Detailed description about $title',
+              services: ['Service 1', 'Service 2', 'Service 3'],
+              certificates: ['Certificate 1', 'Certificate 2'],
+            ),
+          ),
+        );
+      },
+      child: Card(
+        color: Theme.of(context).cardColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                child: CachedNetworkImage(
+                  imageUrl: image,
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: isDarkMode ? Colors.white : Colors.black,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

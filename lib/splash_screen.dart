@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'introduction_page.dart';
-import 'login_page.dart';
+import 'dart:async';
+import 'l10n/app_localization.dart';
+import 'video_splash_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -22,40 +22,33 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _navigateToNext();
-  }
-
-  Future<void> _navigateToNext() async {
-    await Future.delayed(Duration(seconds: 3)); // Display splash screen for 3 seconds
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool seenIntroduction = prefs.getBool('seenIntroduction') ?? false;
-
-    if (seenIntroduction) {
+    Timer(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => LoginPage(
-            isDarkMode: widget.isDarkMode,
-            onThemeChanged: widget.onThemeChanged,
-            onLanguageChanged: widget.onLanguageChanged,
+          builder: (context) => VideoScreen(
+            onVideoEnd: () {
+              Navigator.pushReplacementNamed(context, '/login');
+            },
           ),
         ),
       );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => IntroductionPage(),
-        ),
-      );
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    var localizations = AppLocalizations.of(context)!;
     return Scaffold(
       body: Center(
-        child: Image.asset('assets/splash.gif', fit: BoxFit.cover, height: double.infinity, width: double.infinity),
+        child: Text(
+          localizations.translate('Shuwayer') ?? 'Factory App',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 40,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }

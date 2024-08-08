@@ -1,17 +1,16 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import 'auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'auth_service.dart';
 import 'l10n/app_localization.dart';
+import 'theme_manager.dart';
 
 class LoginPage extends StatefulWidget {
-  final bool isDarkMode;
   final Function(bool) onThemeChanged;
   final Function(String) onLanguageChanged;
 
   LoginPage({
-    required this.isDarkMode,
     required this.onThemeChanged,
     required this.onLanguageChanged,
   });
@@ -105,7 +104,7 @@ class _LoginPageState extends State<LoginPage> {
 
         // Navigate to the appropriate page based on role
         Widget homePage = await Provider.of<AuthService>(context, listen: false).handleAuth(
-          widget.isDarkMode,
+          Theme.of(context).brightness == Brightness.dark,
           widget.onThemeChanged,
           widget.onLanguageChanged,
         );
@@ -131,8 +130,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: widget.isDarkMode ? Color(0xFF131D26) : Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -143,34 +144,23 @@ class _LoginPageState extends State<LoginPage> {
               Text(
                 localizations.translate('welcomeBack') ?? 'Welcome Back',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: widget.isDarkMode ? Colors.white : Colors.black,
-                ),
+                style: theme.textTheme.headlineSmall,
               ),
               SizedBox(height: 10),
               Text(
                 localizations.translate('loginToContinue') ?? 'Login to continue',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: widget.isDarkMode ? Colors.white : Colors.black,
-                ),
+                style: theme.textTheme.bodyLarge,
               ),
               SizedBox(height: 50),
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: localizations.translate('email') ?? 'Email',
-                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  fillColor: theme.inputDecorationTheme.fillColor,
                   filled: true,
-                  labelStyle: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                  labelStyle: theme.inputDecorationTheme.labelStyle,
+                  border: theme.inputDecorationTheme.border,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -187,14 +177,10 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: localizations.translate('password') ?? 'Password',
-                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  fillColor: theme.inputDecorationTheme.fillColor,
                   filled: true,
-                  labelStyle: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                  labelStyle: theme.inputDecorationTheme.labelStyle,
+                  border: theme.inputDecorationTheme.border,
                 ),
                 obscureText: true,
                 validator: (value) {
@@ -208,7 +194,7 @@ class _LoginPageState extends State<LoginPage> {
               CheckboxListTile(
                 title: Text(
                   localizations.translate('rememberMe') ?? 'Remember me',
-                  style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
+                  style: theme.textTheme.bodyLarge,
                 ),
                 value: _rememberMe,
                 onChanged: (newValue) {
@@ -225,9 +211,10 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: _login,
                       child: Text(localizations.translate('login') ?? 'Login'),
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.black, backgroundColor: Colors.yellow,
+                        foregroundColor: theme.colorScheme.onPrimary,
+                        backgroundColor: theme.colorScheme.primary,
                         padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                        textStyle: TextStyle(fontSize: 16),
+                        textStyle: theme.textTheme.labelLarge,
                       ),
                     ),
               SizedBox(height: 10),
@@ -237,7 +224,9 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 child: Text(
                   localizations.translate('forgotPassword') ?? 'Forgot Password?',
-                  style: TextStyle(color: widget.isDarkMode ? Colors.yellow : Colors.blue),
+                  style: TextStyle(
+                    color: theme.textButtonTheme.style?.foregroundColor?.resolve({MaterialState.pressed}) ?? theme.colorScheme.primary,
+                  ),
                 ),
               ),
               TextButton(
@@ -246,7 +235,9 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 child: Text(
                   localizations.translate('createNewAccount') ?? 'Create new account',
-                  style: TextStyle(color: widget.isDarkMode ? Colors.yellow : Colors.blue),
+                  style: TextStyle(
+                    color: theme.textButtonTheme.style?.foregroundColor?.resolve({MaterialState.pressed}) ?? theme.colorScheme.primary,
+                  ),
                 ),
               ),
               TextButton(
@@ -255,7 +246,9 @@ class _LoginPageState extends State<LoginPage> {
                 },
                 child: Text(
                   localizations.translate('continueAsGuest') ?? 'Continue as Guest',
-                  style: TextStyle(color: widget.isDarkMode ? Colors.yellow : Colors.blue),
+                  style: TextStyle(
+                    color: theme.textButtonTheme.style?.foregroundColor?.resolve({MaterialState.pressed}) ?? theme.colorScheme.primary,
+                  ),
                 ),
               ),
               SizedBox(height: 20),

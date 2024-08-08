@@ -105,7 +105,6 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => LoginPage(
-                      isDarkMode: widget.isDarkMode,
                       onThemeChanged: widget.onThemeChanged,
                       onLanguageChanged: widget.onLanguageChanged,
                     ),

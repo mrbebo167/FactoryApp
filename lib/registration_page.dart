@@ -3,14 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'l10n/app_localization.dart';
 import 'pending_page.dart';
+import 'theme_manager.dart';
 
 class RegistrationPage extends StatefulWidget {
-  final bool isDarkMode;
   final Function(bool) onThemeChanged;
   final Function(String) onLanguageChanged;
 
   RegistrationPage({
-    required this.isDarkMode,
     required this.onThemeChanged,
     required this.onLanguageChanged,
   });
@@ -63,7 +62,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
           context,
           MaterialPageRoute(
             builder: (context) => PendingPage(
-              isDarkMode: widget.isDarkMode,
               onThemeChanged: widget.onThemeChanged,
               onLanguageChanged: widget.onLanguageChanged,
               email: _emailController.text,
@@ -85,8 +83,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: widget.isDarkMode ? Color(0xFF131D26) : Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -97,34 +97,23 @@ class _RegistrationPageState extends State<RegistrationPage> {
               Text(
                 localizations.translate('createNewAccount') ?? 'Create New Account',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: widget.isDarkMode ? Colors.white : Colors.black,
-                ),
+                style: theme.textTheme.titleLarge,
               ),
               SizedBox(height: 10),
               Text(
                 localizations.translate('registerToContinue') ?? 'Register to continue',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: widget.isDarkMode ? Colors.white : Colors.black,
-                ),
+                style: theme.textTheme.titleMedium,
               ),
               SizedBox(height: 50),
               TextFormField(
                 controller: _firstNameController,
                 decoration: InputDecoration(
                   labelText: localizations.translate('firstName') ?? 'First Name',
-                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  fillColor: theme.inputDecorationTheme.fillColor,
                   filled: true,
-                  labelStyle: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                  labelStyle: theme.textTheme.bodyLarge,
+                  border: theme.inputDecorationTheme.border,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -138,14 +127,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 controller: _lastNameController,
                 decoration: InputDecoration(
                   labelText: localizations.translate('lastName') ?? 'Last Name',
-                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  fillColor: theme.inputDecorationTheme.fillColor,
                   filled: true,
-                  labelStyle: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                  labelStyle: theme.textTheme.bodyLarge,
+                  border: theme.inputDecorationTheme.border,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -159,14 +144,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: localizations.translate('email') ?? 'Email',
-                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  fillColor: theme.inputDecorationTheme.fillColor,
                   filled: true,
-                  labelStyle: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                  labelStyle: theme.textTheme.bodyLarge,
+                  border: theme.inputDecorationTheme.border,
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -183,14 +164,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 controller: _passwordController,
                 decoration: InputDecoration(
                   labelText: localizations.translate('password') ?? 'Password',
-                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  fillColor: theme.inputDecorationTheme.fillColor,
                   filled: true,
-                  labelStyle: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                  labelStyle: theme.textTheme.bodyLarge,
+                  border: theme.inputDecorationTheme.border,
                 ),
                 obscureText: true,
                 validator: (value) {
@@ -208,14 +185,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 controller: _confirmPasswordController,
                 decoration: InputDecoration(
                   labelText: localizations.translate('confirmPassword') ?? 'Confirm Password',
-                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  fillColor: theme.inputDecorationTheme.fillColor,
                   filled: true,
-                  labelStyle: TextStyle(
-                    color: widget.isDarkMode ? Colors.white : Colors.black,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
+                  labelStyle: theme.textTheme.bodyLarge,
+                  border: theme.inputDecorationTheme.border,
                 ),
                 obscureText: true,
                 validator: (value) {
@@ -232,9 +205,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       onPressed: _register,
                       child: Text(localizations.translate('register') ?? 'Register'),
                       style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.black, backgroundColor: Colors.yellow,
+                        backgroundColor: theme.elevatedButtonTheme.style?.backgroundColor?.resolve({}),
                         padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                        textStyle: TextStyle(fontSize: 16),
+                        textStyle: theme.textTheme.labelLarge,
                       ),
                     ),
               SizedBox(height: 10),
@@ -244,7 +217,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 },
                 child: Text(
                   localizations.translate('alreadyHaveAnAccountLogin') ?? 'Already have an account? Login',
-                  style: TextStyle(color: widget.isDarkMode ? Colors.yellow : Colors.blue),
+                  style: TextStyle(color: theme.primaryColor),
                 ),
               ),
             ],

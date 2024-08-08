@@ -1,63 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'contact_us_page.dart';
 import 'about_us_page.dart';
 import 'l10n/app_localization.dart';
 import 'terms_and_conditions_page.dart';
 import 'faq_page.dart';
+import 'theme_manager.dart';
 
-class SettingsPage extends StatefulWidget {
-  final bool isDarkMode;
+class SettingsPage extends StatelessWidget {
   final Function(bool) onThemeChanged;
   final Function(String) onLanguageChanged;
 
   SettingsPage({
-    required this.isDarkMode,
     required this.onThemeChanged,
     required this.onLanguageChanged,
   });
 
   @override
-  _SettingsPageState createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  late bool _isDarkMode;
-
-  @override
-  void initState() {
-    super.initState();
-    _isDarkMode = widget.isDarkMode;
-  }
-
-  void _toggleTheme(bool value) async {
-    widget.onThemeChanged(value);
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isDarkMode', value);
-  }
-
-  void _changeLanguage(String languageCode) {
-    widget.onLanguageChanged(languageCode);
-  }
-
-  @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context)!;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Color(0xFF1F1F1F) : Colors.white,
       appBar: AppBar(
         title: Text(localizations.translate('settings') ?? 'Settings'),
-        backgroundColor: isDarkMode ? Colors.black : Colors.yellow,
-        iconTheme: IconThemeData(color: isDarkMode ? Colors.yellow : Colors.black),
       ),
       body: ListView(
         children: [
           ListTile(
-            leading: Icon(Icons.contact_mail, color: isDarkMode ? Colors.yellow : Colors.black),
-            title: Text(localizations.translate('contactUs') ?? 'Contact Us', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
-            trailing: Icon(Icons.arrow_forward, color: isDarkMode ? Colors.yellow : Colors.black),
+            leading: Icon(Icons.contact_mail),
+            title: Text(localizations.translate('contactUs') ?? 'Contact Us', style: theme.textTheme.bodyLarge),
+            trailing: Icon(Icons.arrow_forward),
             onTap: () {
               Navigator.push(
                 context,
@@ -66,9 +38,9 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.info, color: isDarkMode ? Colors.yellow : Colors.black),
-            title: Text(localizations.translate('aboutUs') ?? 'About Us', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
-            trailing: Icon(Icons.arrow_forward, color: isDarkMode ? Colors.yellow : Colors.black),
+            leading: Icon(Icons.info),
+            title: Text(localizations.translate('aboutUs') ?? 'About Us', style: theme.textTheme.bodyLarge),
+            trailing: Icon(Icons.arrow_forward),
             onTap: () {
               Navigator.push(
                 context,
@@ -77,9 +49,9 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.description, color: isDarkMode ? Colors.yellow : Colors.black),
-            title: Text(localizations.translate('termsAndConditions') ?? 'Terms and Conditions', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
-            trailing: Icon(Icons.arrow_forward, color: isDarkMode ? Colors.yellow : Colors.black),
+            leading: Icon(Icons.description),
+            title: Text(localizations.translate('termsAndConditions') ?? 'Terms and Conditions', style: theme.textTheme.bodyLarge),
+            trailing: Icon(Icons.arrow_forward),
             onTap: () {
               Navigator.push(
                 context,
@@ -88,9 +60,9 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.question_answer, color: isDarkMode ? Colors.yellow : Colors.black),
-            title: Text(localizations.translate('faq') ?? 'FAQ', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
-            trailing: Icon(Icons.arrow_forward, color: isDarkMode ? Colors.yellow : Colors.black),
+            leading: Icon(Icons.question_answer),
+            title: Text(localizations.translate('faq') ?? 'FAQ', style: theme.textTheme.bodyLarge),
+            trailing: Icon(Icons.arrow_forward),
             onTap: () {
               Navigator.push(
                 context,
@@ -99,33 +71,28 @@ class _SettingsPageState extends State<SettingsPage> {
             },
           ),
           SwitchListTile(
-            activeColor: Colors.yellow,
-            title: Text(localizations.translate('darkMode') ?? 'Dark Mode', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
-            value: _isDarkMode,
-            onChanged: (value) {
-              setState(() {
-                _isDarkMode = value;
-              });
-              _toggleTheme(value);
-            },
+            activeColor: ThemeManager.primaryColor,
+            title: Text(localizations.translate('darkMode') ?? 'Dark Mode', style: theme.textTheme.bodyLarge),
+            value: theme.brightness == Brightness.dark,
+            onChanged: onThemeChanged,
           ),
           ListTile(
-            leading: Icon(Icons.language, color: isDarkMode ? Colors.yellow : Colors.black),
-            title: Text(localizations.translate('language') ?? 'Language', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+            leading: Icon(Icons.language),
+            title: Text(localizations.translate('language') ?? 'Language', style: theme.textTheme.bodyLarge),
             trailing: DropdownButton<String>(
               value: Localizations.localeOf(context).languageCode,
               onChanged: (String? newValue) {
                 if (newValue != null) {
-                  _changeLanguage(newValue);
+                  onLanguageChanged(newValue);
                 }
               },
               items: <String>['en', 'ar'].map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
-                  child: Text(value == 'en' ? 'English' : 'Arabic', style: TextStyle(color: isDarkMode ? Colors.white : Colors.black)),
+                  child: Text(value == 'en' ? 'English' : 'Arabic', style: theme.textTheme.bodyLarge),
                 );
               }).toList(),
-              dropdownColor: isDarkMode ? Colors.black : Colors.white,
+              dropdownColor: theme.scaffoldBackgroundColor,
             ),
           ),
         ],

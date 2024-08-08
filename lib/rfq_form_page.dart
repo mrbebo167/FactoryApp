@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
-import 'theme_manager.dart';
+import 'package:factory_app/theme_manager.dart';
 
 class RFQFormPage extends StatefulWidget {
   final bool isDarkMode;
+  final Function(bool) onThemeChanged;
+  final Function(String) onLanguageChanged;
 
-  RFQFormPage({required this.isDarkMode});
+  RFQFormPage({
+    required this.isDarkMode,
+    required this.onThemeChanged,
+    required this.onLanguageChanged,
+  });
 
   @override
   _RFQFormPageState createState() => _RFQFormPageState();
@@ -12,10 +18,10 @@ class RFQFormPage extends StatefulWidget {
 
 class _RFQFormPageState extends State<RFQFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _companyController = TextEditingController();
-  final TextEditingController _detailsController = TextEditingController();
+  final TextEditingController _companyNameController = TextEditingController();
+  final TextEditingController _productDescriptionController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _contactInfoController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +30,7 @@ class _RFQFormPageState extends State<RFQFormPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Request for Quotation'),
-        backgroundColor: theme.colorScheme.primary,
+        backgroundColor: theme.primaryColor,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -33,50 +39,14 @@ class _RFQFormPageState extends State<RFQFormPage> {
           child: ListView(
             children: [
               TextFormField(
-                controller: _nameController,
+                controller: _companyNameController,
                 decoration: InputDecoration(
-                  labelText: 'Name',
-                  fillColor: theme.colorScheme.surface,
+                  labelText: 'Company Name',
+                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
                   filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                  labelStyle: TextStyle(
+                    color: widget.isDarkMode ? Colors.white : Colors.black,
                   ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  fillColor: theme.colorScheme.surface,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  }
-                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                    return 'Please enter a valid email address';
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 20),
-              TextFormField(
-                controller: _companyController,
-                decoration: InputDecoration(
-                  labelText: 'Company',
-                  fillColor: theme.colorScheme.surface,
-                  filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
@@ -90,19 +60,68 @@ class _RFQFormPageState extends State<RFQFormPage> {
               ),
               SizedBox(height: 20),
               TextFormField(
-                controller: _detailsController,
+                controller: _productDescriptionController,
                 decoration: InputDecoration(
-                  labelText: 'Details',
-                  fillColor: theme.colorScheme.surface,
+                  labelText: 'Product Description',
+                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
                   filled: true,
+                  labelStyle: TextStyle(
+                    color: widget.isDarkMode ? Colors.white : Colors.black,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
-                maxLines: 5,
+                maxLines: 4,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter the details of your request';
+                    return 'Please enter a product description';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: _quantityController,
+                decoration: InputDecoration(
+                  labelText: 'Quantity',
+                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  filled: true,
+                  labelStyle: TextStyle(
+                    color: widget.isDarkMode ? Colors.white : Colors.black,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter the quantity';
+                  }
+                  if (int.tryParse(value) == null) {
+                    return 'Please enter a valid number';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: _contactInfoController,
+                decoration: InputDecoration(
+                  labelText: 'Contact Information',
+                  fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
+                  filled: true,
+                  labelStyle: TextStyle(
+                    color: widget.isDarkMode ? Colors.white : Colors.black,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your contact information';
                   }
                   return null;
                 },
@@ -111,17 +130,15 @@ class _RFQFormPageState extends State<RFQFormPage> {
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // Process the RFQ here
+                    // Process the RFQ form
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Request submitted successfully')),
+                      SnackBar(content: Text('Request for Quotation sent successfully!')),
                     );
                   }
                 },
                 child: Text('Submit'),
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: theme.colorScheme.onPrimary, backgroundColor: theme.colorScheme.primary,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                  textStyle: TextStyle(fontSize: 16),
+                  backgroundColor: theme.primaryColor,
                 ),
               ),
             ],

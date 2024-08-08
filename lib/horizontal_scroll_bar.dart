@@ -14,7 +14,7 @@ class HorizontalScrollBar extends StatelessWidget {
         itemCount: companies.length,
         itemBuilder: (context, index) {
           return Container(
-            width: 150,
+            width: 250,
             margin: EdgeInsets.symmetric(horizontal: 8.0),
             decoration: BoxDecoration(
               color: Colors.blue,

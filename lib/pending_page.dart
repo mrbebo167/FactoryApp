@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'l10n/app_localization.dart';
 import 'login_page.dart';
+import 'theme_manager.dart';
 
 class PendingPage extends StatefulWidget {
-  final bool isDarkMode;
   final Function(bool) onThemeChanged;
   final Function(String) onLanguageChanged;
   final String email;
 
   PendingPage({
-    required this.isDarkMode,
     required this.onThemeChanged,
     required this.onLanguageChanged,
     required this.email,
@@ -53,16 +52,17 @@ class _PendingPageState extends State<PendingPage> {
   @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: widget.isDarkMode ? Color(0xFF1F1F1F) : Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(localizations.translate('pendingVerification') ?? 'Pending Verification'),
         actions: [
           Switch(
-            value: widget.isDarkMode,
+            value: theme.brightness == Brightness.dark,
             onChanged: widget.onThemeChanged,
-            activeColor: Colors.yellow,
+            activeColor: Theme.of(context).colorScheme.secondary,
           ),
         ],
       ),
@@ -77,10 +77,7 @@ class _PendingPageState extends State<PendingPage> {
                       ? localizations.translate('registrationAccepted') ?? 'Your registration request was accepted. You can now log in.'
                       : localizations.translate('registrationPending') ?? 'Your registration request is pending. Please wait for approval.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                color: widget.isDarkMode ? Colors.white : Colors.black,
-              ),
+              style: theme.textTheme.bodyLarge,
             ),
             SizedBox(height: 20),
             ElevatedButton(
@@ -89,7 +86,6 @@ class _PendingPageState extends State<PendingPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => LoginPage(
-                      isDarkMode: widget.isDarkMode,
                       onThemeChanged: widget.onThemeChanged,
                       onLanguageChanged: widget.onLanguageChanged,
                     ),
@@ -98,9 +94,9 @@ class _PendingPageState extends State<PendingPage> {
               },
               child: Text(localizations.translate('backToLogin') ?? 'Back to Login'),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.black, backgroundColor: Colors.yellow,
+                foregroundColor: theme.colorScheme.onPrimary, backgroundColor: theme.colorScheme.primary,
                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                textStyle: TextStyle(fontSize: 16),
+                textStyle: theme.textTheme.labelLarge,
               ),
             ),
           ],

@@ -1,8 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'auth_service.dart';
 import 'guest_home.dart';
 import 'l10n/app_localization.dart';
@@ -16,12 +19,31 @@ import 'registration_page.dart';
 import 'splash_screen.dart';
 import 'introduction_page.dart';
 import 'theme_manager.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'profile_page_customer.dart';
+import 'contact_us_page.dart';
+import 'about_us_page.dart';
+import 'company_detail_page.dart';
+import 'rfq_form_page.dart';
+import 'order_service.dart';
+import 'video_splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await FlutterDownloader.initialize(
+    debug: true, // Optional: set to false to disable printing logs to console
+  );
+
+  await _checkAndRequestPermissions();
+
   runApp(MyApp());
+}
+
+Future<void> _checkAndRequestPermissions() async {
+  var status = await Permission.storage.status;
+  if (!status.isGranted) {
+    await Permission.storage.request();
+  }
 }
 
 class MyApp extends StatefulWidget {
@@ -33,22 +55,24 @@ class _MyAppState extends State<MyApp> {
   bool isDarkMode = false;
   Locale _locale = Locale('en');
 
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeAndLanguage();
+  }
+
   void onThemeChanged(bool value) {
     setState(() {
       isDarkMode = value;
     });
+    _saveThemeToPreferences(value);
   }
 
   void onLanguageChanged(String languageCode) {
     setState(() {
       _locale = Locale(languageCode);
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _loadThemeAndLanguage();
+    _saveLanguageToPreferences(languageCode);
   }
 
   void _loadThemeAndLanguage() async {
@@ -60,6 +84,11 @@ class _MyAppState extends State<MyApp> {
       setState(() {
         isDarkMode = savedTheme;
       });
+    } else {
+      final brightness = WidgetsBinding.instance.window.platformBrightness;
+      setState(() {
+        isDarkMode = brightness == Brightness.dark;
+      });
     }
 
     if (savedLanguage != null) {
@@ -69,16 +98,29 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void _saveThemeToPreferences(bool isDarkMode) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', isDarkMode);
+  }
+
+  void _saveLanguageToPreferences(String languageCode) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('languageCode', languageCode);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthService(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthService>(create: (_) => AuthService()),
+        ChangeNotifierProvider<OrderService>(create: (_) => OrderService()),
+      ],
       child: Consumer<AuthService>(
         builder: (context, authService, _) {
           return MaterialApp(
             theme: ThemeManager.lightTheme,
             darkTheme: ThemeManager.darkTheme,
-            themeMode: ThemeMode.system,
+            themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
             locale: _locale,
             localizationsDelegates: [
               AppLocalizations.delegate,
@@ -99,7 +141,14 @@ class _MyAppState extends State<MyApp> {
                     onLanguageChanged: onLanguageChanged,
                   );
                 } else if (snapshot.data == false) {
-                  return IntroductionPage();
+                  return IntroductionPage(
+                    isDarkMode: isDarkMode,
+                    onThemeChanged: onThemeChanged,
+                    onLanguageChanged: onLanguageChanged,
+                    onGetStarted: () {
+                      Navigator.pushReplacementNamed(context, '/login');
+                    },
+                  );
                 } else {
                   return StreamBuilder<User?>(
                     stream: authService.authStateChanges,
@@ -108,10 +157,10 @@ class _MyAppState extends State<MyApp> {
                         User? user = snapshot.data;
 
                         if (user == null) {
-                          return LoginPage(
-                            isDarkMode: isDarkMode,
-                            onThemeChanged: onThemeChanged,
-                            onLanguageChanged: onLanguageChanged,
+                          return VideoScreen(
+                            onVideoEnd: () {
+                              Navigator.pushReplacementNamed(context, '/login');
+                            },
                           );
                         } else {
                           return FutureBuilder<Widget>(
@@ -162,12 +211,10 @@ class _MyAppState extends State<MyApp> {
                     onLanguageChanged: onLanguageChanged,
                   ),
               '/register': (context) => RegistrationPage(
-                    isDarkMode: isDarkMode,
                     onThemeChanged: onThemeChanged,
                     onLanguageChanged: onLanguageChanged,
                   ),
               '/guestHome': (context) => GuestHomePage(
-                    isDarkMode: isDarkMode,
                     onThemeChanged: onThemeChanged,
                     onLanguageChanged: onLanguageChanged,
                   ),
@@ -177,12 +224,34 @@ class _MyAppState extends State<MyApp> {
                     onLanguageChanged: onLanguageChanged,
                   ),
               '/pending': (context) => PendingPage(
-                    isDarkMode: isDarkMode,
                     onThemeChanged: onThemeChanged,
                     onLanguageChanged: onLanguageChanged,
                     email: '', // Ensure to pass the correct email
                   ),
-              // Define other routes here
+              '/profile': (context) => CustomerProfilePage(
+                    onThemeChanged: onThemeChanged,
+                    onLanguageChanged: onLanguageChanged,
+                  ),
+              '/contactUs': (context) => ContactUsPage(),
+              '/aboutUs': (context) => AboutUsPage(),
+              '/companyDetails': (context) => CompanyDetailPage(
+                    companyName: '',
+                    aboutText: '',
+                    services: [],
+                    certificates: [],
+                  ),
+              '/rfqForm': (context) => RFQFormPage(
+                    isDarkMode: isDarkMode,
+                    onThemeChanged: onThemeChanged,
+                    onLanguageChanged: onLanguageChanged,
+                  ),
+              '/pdfViewer': (context) => PDFViewerPage(
+                    path: '',
+                  ),
+              '/login': (context) => LoginPage(
+                    onThemeChanged: onThemeChanged,
+                    onLanguageChanged: onLanguageChanged,
+                  ),
             },
           );
         },

@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
 
-class ThemeManager {
+class ThemeManager with ChangeNotifier {
   static final Color primaryColor = Color(0xFFF2BB16);
   static final Color secondaryColor = Colors.grey.shade800;
   static final Color lightBackgroundColor = Colors.white;
   static final Color darkBackgroundColor = Color(0xFF1F1F1F);
+
+  ThemeMode _themeMode = ThemeMode.system;
+
+  ThemeMode get themeMode => _themeMode;
+
+  void setThemeMode(ThemeMode themeMode) {
+    _themeMode = themeMode;
+    notifyListeners();
+  }
+
+  void setLanguage(String languageCode) {
+    // Implement language change logic here
+  }
 
   static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
@@ -18,10 +31,17 @@ class ThemeManager {
     textTheme: TextTheme(
       displayLarge: TextStyle(color: Colors.black),
       bodyLarge: TextStyle(color: Colors.black),
+      labelLarge: TextStyle(color: Colors.black),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.black, backgroundColor: primaryColor,
+        foregroundColor: Colors.black,
+        backgroundColor: primaryColor,
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: primaryColor,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -35,6 +55,11 @@ class ThemeManager {
     colorScheme: ColorScheme.light(
       primary: primaryColor,
       secondary: secondaryColor,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: lightBackgroundColor,
+      selectedItemColor: primaryColor,
+      unselectedItemColor: Colors.grey,
     ),
   );
 
@@ -50,10 +75,17 @@ class ThemeManager {
     textTheme: TextTheme(
       displayLarge: TextStyle(color: Colors.white),
       bodyLarge: TextStyle(color: Colors.white),
+      labelLarge: TextStyle(color: Colors.white),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.black, backgroundColor: primaryColor,
+        foregroundColor: Colors.black,
+        backgroundColor: primaryColor,
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: primaryColor,
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -67,6 +99,11 @@ class ThemeManager {
     colorScheme: ColorScheme.dark(
       primary: primaryColor,
       secondary: secondaryColor,
+    ),
+    bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      backgroundColor: darkBackgroundColor,
+      selectedItemColor: primaryColor,
+      unselectedItemColor: Colors.white,
     ),
   );
 }

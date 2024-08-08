@@ -3,10 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'customer_settings_page.dart';
 import 'l10n/app_localization.dart';
-import 'order_page.dart';
+import 'company_detail_page.dart';
 import 'auth_service.dart';
 import 'profile_page_customer.dart';
 import 'package:provider/provider.dart';
+import 'theme_manager.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -31,26 +32,19 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
     var localizations = AppLocalizations.of(context)!;
 
     List<Widget> _pages = [
-      CustomerHomePage(isDarkMode: widget.isDarkMode),
-      OrderPage(
-        isDarkMode: widget.isDarkMode,
-        onThemeChanged: widget.onThemeChanged,
-        onLanguageChanged: widget.onLanguageChanged,
-      ),
+      CustomerHomePage(),
+      VirtualTourPage(),
       CustomerSettingsPage(
-        isDarkMode: widget.isDarkMode,
         onThemeChanged: widget.onThemeChanged,
         onLanguageChanged: widget.onLanguageChanged,
       ),
       CustomerProfilePage(
-        isDarkMode: widget.isDarkMode,
         onThemeChanged: widget.onThemeChanged,
         onLanguageChanged: widget.onLanguageChanged,
       ),
     ];
 
     return Scaffold(
-      backgroundColor: widget.isDarkMode ? Color(0xFF1F1F1F) : Colors.white,
       appBar: AppBar(
         title: Text(localizations.translate('customerHome') ?? 'Customer Home'),
         actions: [
@@ -77,8 +71,8 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             label: localizations.translate('home') ?? 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: localizations.translate('orders') ?? 'Orders',
+            icon: Icon(Icons.tour),
+            label: localizations.translate('virtualTour') ?? 'Virtual Tour',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
@@ -89,201 +83,167 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
             label: localizations.translate('profile') ?? 'Profile',
           ),
         ],
-        selectedItemColor: widget.isDarkMode ? Colors.yellow : Colors.yellow,
-        unselectedItemColor: widget.isDarkMode ? Colors.white : Colors.grey,
-        backgroundColor: widget.isDarkMode ? Color(0xFF1F1F1F) : Colors.white,
       ),
     );
   }
 }
 
 class CustomerHomePage extends StatelessWidget {
-  final bool isDarkMode;
-
-  CustomerHomePage({required this.isDarkMode});
-
   @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context)!;
+    final companies = [
+      {
+        'title': 'ELECTRICAL ENGINEERING SYSTEMS "EES"',
+        'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company1.png?alt=media&token=58eea9a1-2c66-4032-b5a0-e0771eaaa9fe'
+      },
+      {
+        'title': 'Heavy Metal industries',
+        'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company2.png?alt=media&token=43bac023-dcac-472f-b1b7-6c4a195c0d35'
+      },
+      {
+        'title': 'Steel Galvanizing',
+        'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company3.png?alt=media&token=fde97187-b06f-45a4-874f-06d1d727a78d'
+      },
+      {
+        'title': 'HVAC Division',
+        'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company4.png?alt=media&token=44247617-9c5f-42ed-9b11-b9fbb4bacefa'
+      },
+      {
+        'title': 'Equipment Rental',
+        'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company5.png?alt=media&token=9c2e2b36-c37f-4ff5-8d14-37ac3ec76780'
+      },
+      {
+        'title': 'Energy Services Division "EQTASID"',
+        'image': 'https://firebasestorage.googleapis.com/v0/b/factoryapp-7775e.appspot.com/o/company6.png?alt=media&token=43af472b-34a6-4ae6-9634-dac2f43896e5'
+      },
+    ];
 
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('orders').snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(
-            child: Text(
-              localizations.translate('noOrdersFound') ?? 'No orders found',
-              style: TextStyle(
-                color: isDarkMode ? Colors.white : Colors.black,
-              ),
-            ),
-          );
-        }
-
-        final orders = snapshot.data!.docs;
-
-        return ListView.builder(
-          itemCount: orders.length,
-          itemBuilder: (context, index) {
-            final order = orders[index];
-            return ListTile(
-              title: Text(
-                '${localizations.translate('order')} ${order['product']}',
-                style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-              ),
-              subtitle: Text(
-                '${localizations.translate('quantity')}: ${order['quantity']}',
-                style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
-              ),
-              trailing: Text(
-                '${localizations.translate('status')}: ${order['status']}',
-                style: TextStyle(color: isDarkMode ? Colors.white : Colors.black),
+    return GridView.builder(
+      padding: EdgeInsets.all(16),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.8,
+      ),
+      itemCount: companies.length,
+      itemBuilder: (context, index) {
+        final company = companies[index];
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CompanyDetailPage(
+                  companyName: company['title']!,
+                  aboutText: 'About text for ${company['title']}',
+                  services: ['Service 1', 'Service 2', 'Service 3'],
+                  certificates: ['Certificate 1', 'Certificate 2'],
+                ),
               ),
             );
           },
+          child: Card(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                    child: Image.network(
+                      company['image']!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    company['title']!,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
   }
 }
 
-class OrderPage extends StatefulWidget {
-  final bool isDarkMode;
-  final Function(bool) onThemeChanged;
-  final Function(String) onLanguageChanged;
-
-  OrderPage({
-    required this.isDarkMode,
-    required this.onThemeChanged,
-    required this.onLanguageChanged,
-  });
-
-  @override
-  _OrderPageState createState() => _OrderPageState();
-}
-
-class _OrderPageState extends State<OrderPage> {
-  final _productController = TextEditingController();
-  final _quantityController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
-
-  void _placeOrder() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      try {
-        await FirebaseFirestore.instance.collection('orders').add({
-          'product': _productController.text,
-          'quantity': int.parse(_quantityController.text),
-          'status': 'Pending',
-          'userId': FirebaseAuth.instance.currentUser?.uid,
-        });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Order placed successfully')),
-        );
-
-        _productController.clear();
-        _quantityController.clear();
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error placing order: ${e.toString()}')),
-        );
-      } finally {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
+class VirtualTourPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: widget.isDarkMode ? Color(0xFF1F1F1F) : Colors.white,
       appBar: AppBar(
-        title: Text(localizations.translate('placeOrder') ?? 'Place Order'),
+        title: Text(localizations.translate('virtualTour') ?? 'Virtual Tour'),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: ListView(
-                  children: [
-                    TextFormField(
-                      controller: _productController,
-                      decoration: InputDecoration(
-                        labelText: localizations.translate('product') ?? 'Product',
-                        fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
-                        filled: true,
-                        labelStyle: TextStyle(
-                          color: widget.isDarkMode ? Colors.white : Colors.black,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return localizations.translate('pleaseEnterAProduct') ?? 'Please enter a product';
-                        }
-                        return null;
-                      },
-                      style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
-                    ),
-                    SizedBox(height: 20),
-                    TextFormField(
-                      controller: _quantityController,
-                      decoration: InputDecoration(
-                        labelText: localizations.translate('quantity') ?? 'Quantity',
-                        fillColor: widget.isDarkMode ? Colors.grey[800] : Colors.grey[200],
-                        filled: true,
-                        labelStyle: TextStyle(
-                          color: widget.isDarkMode ? Colors.white : Colors.black,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return localizations.translate('pleaseEnterAQuantity') ?? 'Please enter a quantity';
-                        }
-                        if (int.tryParse(value) == null) {
-                          return localizations.translate('pleaseEnterAValidNumber') ?? 'Please enter a valid number';
-                        }
-                        return null;
-                      },
-                      style: TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
-                    ),
-                    SizedBox(height: 20),
-                    _isLoading
-                        ? Center(child: CircularProgressIndicator())
-                        : ElevatedButton(
-                            onPressed: _placeOrder,
-                            child: Text(localizations.translate('placeOrder') ?? 'Place Order'),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.black, backgroundColor: Colors.yellow,
-                              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                              textStyle: TextStyle(fontSize: 16),
-                            ),
-                          ),
-                  ],
-                ),
-              ),
+      body: ListView(
+        children: [
+          ListTile(
+            title: Text(
+              'ELECTRICAL ENGINEERING SYSTEMS "EES"',
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
+            onTap: () {
+              // Navigate to EES virtual tour page
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Heavy Metal industries',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            onTap: () {
+              // Navigate to Heavy Metal industries virtual tour page
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Steel Galvanizing',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            onTap: () {
+              // Navigate to Steel Galvanizing virtual tour page
+            },
+          ),
+          ListTile(
+            title: Text(
+              'HVAC Division',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            onTap: () {
+              // Navigate to HVAC Division virtual tour page
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Equipment Rental',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            onTap: () {
+              // Navigate to Equipment Rental virtual tour page
+            },
+          ),
+          ListTile(
+            title: Text(
+              'Energy Services Division "EQTASID"',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            onTap: () {
+              // Navigate to EQTASID virtual tour page
+            },
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
 import 'l10n/app_localization.dart';
+import 'theme_manager.dart';
 
 class AboutUsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var localizations = AppLocalizations.of(context)!;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: isDarkMode ? Color(0xFF1F1F1F) : Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(localizations.translate('aboutUs') ?? 'About Us'),
-        backgroundColor: isDarkMode ? Colors.black : Colors.yellow,
-        iconTheme: IconThemeData(color: isDarkMode ? Colors.yellow : Colors.black),
+        backgroundColor: theme.appBarTheme.backgroundColor,
+        iconTheme: theme.appBarTheme.iconTheme,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: <Widget>[
-            _buildSectionTitle(localizations.translate('mission') ?? 'Our Mission', isDarkMode),
-            _buildSectionContent(localizations.translate('missionContent') ?? 'Our mission is to...', isDarkMode),
-            _buildSectionTitle(localizations.translate('vision') ?? 'Our Vision', isDarkMode),
-            _buildSectionContent(localizations.translate('visionContent') ?? 'Our vision is to...', isDarkMode),
-            _buildSectionTitle(localizations.translate('values') ?? 'Our Values', isDarkMode),
-            _buildSectionContent(localizations.translate('valuesContent') ?? 'We value...', isDarkMode),
-            _buildSectionTitle(localizations.translate('ourTeam') ?? 'Our Team', isDarkMode),
-            _buildSectionContent(localizations.translate('teamContent') ?? 'Meet our dedicated team...', isDarkMode),
-            _buildSectionTitle(localizations.translate('contactInfo') ?? 'Contact Information', isDarkMode),
-            _buildContactInfo(localizations, isDarkMode),
-            _buildSectionTitle(localizations.translate('gallery') ?? 'Gallery', isDarkMode),
+            _buildSectionTitle(localizations.translate('mission') ?? 'Our Mission', theme),
+            _buildSectionContent(localizations.translate('missionContent') ?? 'Our mission is to...', theme),
+            _buildSectionTitle(localizations.translate('vision') ?? 'Our Vision', theme),
+            _buildSectionContent(localizations.translate('visionContent') ?? 'Our vision is to...', theme),
+            _buildSectionTitle(localizations.translate('values') ?? 'Our Values', theme),
+            _buildSectionContent(localizations.translate('valuesContent') ?? 'We value...', theme),
+            _buildSectionTitle(localizations.translate('ourTeam') ?? 'Our Team', theme),
+            _buildSectionContent(localizations.translate('teamContent') ?? 'Meet our dedicated team...', theme),
+            _buildSectionTitle(localizations.translate('contactInfo') ?? 'Contact Information', theme),
+            _buildContactInfo(localizations, theme),
+            _buildSectionTitle(localizations.translate('gallery') ?? 'Gallery', theme),
             _buildImageGallery(),
           ],
         ),
@@ -36,56 +37,46 @@ class AboutUsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title, bool isDarkMode) {
+  Widget _buildSectionTitle(String title, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
         title,
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: isDarkMode ? Colors.yellow : Colors.black,
-        ),
+        style: theme.textTheme.titleLarge!.copyWith(fontWeight: FontWeight.bold),
       ),
     );
   }
 
-  Widget _buildSectionContent(String content, bool isDarkMode) {
+  Widget _buildSectionContent(String content, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: Text(
         content,
-        style: TextStyle(
-          fontSize: 16,
-          color: isDarkMode ? Colors.white : Colors.black,
-        ),
+        style: theme.textTheme.bodyMedium,
       ),
     );
   }
 
-  Widget _buildContactInfo(AppLocalizations localizations, bool isDarkMode) {
+  Widget _buildContactInfo(AppLocalizations localizations, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildContactItem(Icons.phone, localizations.translate('phone') ?? 'Phone: +123 456 7890', isDarkMode),
-        _buildContactItem(Icons.email, localizations.translate('email') ?? 'Email: info@factoryapp.com', isDarkMode),
+        _buildContactItem(Icons.phone, localizations.translate('phone') ?? 'Phone: +123 456 7890', theme),
+        _buildContactItem(Icons.email, localizations.translate('email') ?? 'Email: info@factoryapp.com', theme),
       ],
     );
   }
 
-  Widget _buildContactItem(IconData icon, String text, bool isDarkMode) {
+  Widget _buildContactItem(IconData icon, String text, ThemeData theme) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Icon(icon, color: isDarkMode ? Colors.yellow : Colors.black),
+          Icon(icon, color: theme.iconTheme.color),
           SizedBox(width: 8),
           Text(
             text,
-            style: TextStyle(
-              fontSize: 16,
-              color: isDarkMode ? Colors.white : Colors.black,
-            ),
+            style: theme.textTheme.bodyMedium,
           ),
         ],
       ),

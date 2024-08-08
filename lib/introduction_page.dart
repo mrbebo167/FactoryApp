@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'l10n/app_localization.dart';
 
 class IntroductionPage extends StatefulWidget {
+  final bool isDarkMode;
+  final Function(bool) onThemeChanged;
+  final Function(String) onLanguageChanged;
+  final VoidCallback onGetStarted;
+
+  IntroductionPage({
+    required this.isDarkMode,
+    required this.onThemeChanged,
+    required this.onLanguageChanged,
+    required this.onGetStarted,
+  });
+
   @override
   _IntroductionPageState createState() => _IntroductionPageState();
 }
@@ -12,26 +25,36 @@ class _IntroductionPageState extends State<IntroductionPage> {
 
   @override
   Widget build(BuildContext context) {
+    var localizations = AppLocalizations.of(context)!;
+
     List<Widget> _pages = [
       _buildPage(
+        context,
+        localizations,
         image: 'assets/intro1.png',
-        title: 'Welcome to the Factory App!',
-        description: 'Manage factory operations efficiently and effectively.',
+        title: localizations.translate('welcomeTitle') ?? 'Welcome to the Factory App!',
+        description: localizations.translate('welcomeDescription') ?? 'Manage factory operations efficiently and effectively.',
       ),
       _buildPage(
+        context,
+        localizations,
         image: 'assets/intro2.png',
-        title: 'Track Orders',
-        description: 'Keep track of all your orders in one place.',
+        title: localizations.translate('trackOrdersTitle') ?? 'Track Orders',
+        description: localizations.translate('trackOrdersDescription') ?? 'Keep track of all your orders in one place.',
       ),
       _buildPage(
+        context,
+        localizations,
         image: 'assets/intro3.png',
-        title: 'Manage Notifications',
-        description: 'Receive real-time updates and notifications.',
+        title: localizations.translate('manageNotificationsTitle') ?? 'Manage Notifications',
+        description: localizations.translate('manageNotificationsDescription') ?? 'Receive real-time updates and notifications.',
       ),
       _buildPage(
+        context,
+        localizations,
         image: 'assets/intro4.png',
-        title: 'Get Started',
-        description: 'Let\'s get started with the Factory App!',
+        title: localizations.translate('getStartedTitle') ?? 'Get Started',
+        description: localizations.translate('getStartedDescription') ?? 'Let\'s get started with the Factory App!',
         isLastPage: true,
       ),
     ];
@@ -52,6 +75,26 @@ class _IntroductionPageState extends State<IntroductionPage> {
             },
           ),
           Positioned(
+            top: 40,
+            right: 20,
+            child: _currentPage < _pages.length - 1
+                ? TextButton(
+                    onPressed: () async {
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('seenIntroduction', true);
+                      widget.onGetStarted();
+                    },
+                    child: Text(
+                      localizations.translate('skip') ?? 'SKIP',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )
+                : SizedBox.shrink(),
+          ),
+          Positioned(
             bottom: 20,
             left: 20,
             right: 20,
@@ -67,7 +110,7 @@ class _IntroductionPageState extends State<IntroductionPage> {
                           );
                         },
                         child: Text(
-                          'BACK',
+                          localizations.translate('back') ?? 'BACK',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.bold,
@@ -99,7 +142,7 @@ class _IntroductionPageState extends State<IntroductionPage> {
                           );
                         },
                         child: Text(
-                          'NEXT',
+                          localizations.translate('next') ?? 'NEXT',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.bold,
@@ -115,12 +158,7 @@ class _IntroductionPageState extends State<IntroductionPage> {
     );
   }
 
-  Widget _buildPage({
-    required String image,
-    required String title,
-    required String description,
-    bool isLastPage = false,
-  }) {
+  Widget _buildPage(BuildContext context, AppLocalizations localizations, {required String image, required String title, required String description, bool isLastPage = false}) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -145,10 +183,9 @@ class _IntroductionPageState extends State<IntroductionPage> {
               onPressed: () async {
                 SharedPreferences prefs = await SharedPreferences.getInstance();
                 await prefs.setBool('seenIntroduction', true);
-                print('Get Started button pressed');
-                Navigator.pushReplacementNamed(context, '/login');
+                widget.onGetStarted();
               },
-              child: Text('Get Started'),
+              child: Text(localizations.translate('getStarted') ?? 'Get Started'),
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 20),
                 textStyle: TextStyle(fontSize: 16),
